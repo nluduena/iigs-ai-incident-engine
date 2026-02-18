@@ -1,0 +1,5 @@
+{
+  "service": "payments-api",
+  "error_code": "DB_TIMEOUT",
+  "impact": "high"
+}

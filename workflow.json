@@ -1,0 +1,63 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "incident-trigger",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "157694ae-9f86-40c8-b648-725f62f07ab9",
+      "name": "Webhook",
+      "webhookId": "bd95c5ac-ee23-4ce8-8a35-62cf7ae95813"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $json.body;\n\n// ===============================\n// CLASSIFICATION\n// ===============================\n\nconst impact = data.impact;\n\nlet severity = \"P2\";\nlet escalation = false;\nlet sla_minutes = 60;\nlet auto_escalate_after_minutes = null;\n\nif (impact === \"high\") {\n  severity = \"P1\";\n  escalation = true;\n  sla_minutes = 15;\n  auto_escalate_after_minutes = 10;\n}\n\n// ===============================\n// KNOWLEDGE BASE (Mock Storage)\n// ===============================\n\n// Simulación de base histórica\nlet historical_db = {\n  \"DB_TIMEOUT\": {\n    occurrences: 5,\n    success_rate: 0.92,\n    workaround: \"Restart DB connection pool\"\n  }\n};\n\nlet known_incident = false;\nlet workaround = null;\nlet success_rate = 0;\nlet recurrence_count = 0;\n\nif (historical_db[data.error_code]) {\n  known_incident = true;\n  workaround = historical_db[data.error_code].workaround;\n  success_rate = historical_db[data.error_code].success_rate;\n  recurrence_count = historical_db[data.error_code].occurrences + 1;\n}\n\n// ===============================\n// CONFIDENCE / DECISION LOGIC\n// ===============================\n\nlet eligible_for_auto_remediation = false;\nlet decision = \"MANUAL_INTERVENTION_REQUIRED\";\nlet status = \"AWAITING_ENGINEER\";\nlet action_taken = null;\n\nif (\n  known_incident &&\n  severity === \"P1\" &&\n  success_rate >= 0.9\n) {\n  eligible_for_auto_remediation = true;\n  decision = \"AUTO_REMEDIATION_EXECUTED\";\n  status = \"MITIGATED\";\n  action_taken = workaround;\n}\n\n// ===============================\n// LEARNING UPDATE (Closed Loop)\n// ===============================\n\nlet learning_update = null;\n\nif (eligible_for_auto_remediation) {\n  learning_update = {\n    model_adjustment: \"Confidence validated\",\n    new_occurrence_count: recurrence_count,\n    reliability_trend: \"Stable\"\n  };\n} else if (known_incident) {\n  learning_update = {\n    model_adjustment: \"Confidence requires review\",\n    new_occurrence_count: recurrence_count,\n    reliability_trend: \"Degrading\"\n  };\n} else {\n  learning_update = {\n    model_adjustment: \"New incident pattern detected\",\n    new_occurrence_count: 1,\n    reliability_trend: \"Unknown\"\n  };\n}\n\n// ===============================\n// FINAL OUTPUT\n// ===============================\n\nreturn [\n  {\n    json: {\n      service: data.service,\n      error_code: data.error_code,\n      impact,\n      severity,\n      escalation,\n      sla_minutes,\n      auto_escalate_after_minutes,\n      known_incident,\n      workaround,\n      success_rate,\n      recurrence_count,\n      eligible_for_auto_remediation,\n      decision,\n      action_taken,\n      status,\n      learning_update,\n      ack: false,\n      start_time: new Date().toISOString(),\n      processed_at: new Date().toISOString()\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "2337dde9-67b5-4150-916e-8895eb8ae971",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "779a6778-0247-4b23-8c74-502f94b8c182",
+  "meta": {
+    "instanceId": "f62c2d81d61ac152ffecb2515fb5bd5d3d4c749eef6c0a2f99a65b65ceaabda5"
+  },
+  "id": "19LOJDxAoNHXy4BL",
+  "tags": []
+}
