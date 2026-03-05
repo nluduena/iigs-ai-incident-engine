@@ -1,4 +1,4 @@
-# IIGS – AI-Driven Closed-Loop Incident Lifecycle Engin (MVP)
+# IIGS – AI-Driven Closed-Loop Incident Lifecycle Engine (MVP)
 
 IIGS (Incident Intelligence & Governance System) is a lightweight AI-assisted workflow automation model built using n8n.
 
